@@ -8,7 +8,8 @@ export const registerUser = async (req, res, next) => {
   const { email, password } = req.body;
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return next(createHttpError(400, 'Email in use'));
+    next(createHttpError(400, 'Email in use'));
+    return;
   }
   const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = await User.create({
@@ -25,11 +26,13 @@ export const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user) {
-    return next(createHttpError(401, 'Invalid credentials'));
+    next(createHttpError(401, 'Invalid credentials'));
+    return;
   }
   const isValidPassword = await bcrypt.compare(password, user.password);
   if (!isValidPassword) {
-    return next(createHttpError(401, 'Invalid credentials'));
+    next(createHttpError(401, 'Invalid credentials'));
+    return;
   }
 
   await Session.deleteOne({ userId: user._id });
@@ -59,11 +62,13 @@ export const refreshUserSession = async (req, res, next) => {
   });
 
   if (!session) {
-    return next(createHttpError(401, 'Session not found'));
+    next(createHttpError(401, 'Session not found'));
+    return;
   }
 
   if (session.refreshTokenValidUntil < new Date()) {
-    return next(createHttpError(401, 'Session token expired'));
+    next(createHttpError(401, 'Session token expired'));
+    return;
   }
 
   await Session.deleteOne({
