@@ -9,7 +9,7 @@ export const registerUser = async (req, res, next) => {
     const { email, password } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      next(createHttpError(400, 'Email in use'));
+      next(createHttpError(409, 'Email in use'));
       return;
     }
     const hashedPassword = await bcrypt.hash(password, 10);
